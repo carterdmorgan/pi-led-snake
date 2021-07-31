@@ -20,90 +20,90 @@ strip.begin()
  
 pygame.init()
  
-white = (255, 255, 255)
-yellow = (255, 255, 102)
-black = (0, 0, 0)
-red = (213, 50, 80)
-green = (0, 255, 0)
-blue = (50, 153, 213)
+gui_black = (0, 0, 0)
+gui_red = (213, 50, 80)
+gui_green = (0, 255, 0)
+gui_blue = (50, 153, 213)
 
-led_height = 18
-led_width = 7
+WHITE = Color(255, 255, 255)
+GREEN = Color(0, 255, 0)
+RED = Color(255, 0, 0)
+BLACK = Color(0, 0, 0)
+
+SNAKE_BLOCK_DIM = 10
+SNAKE_SPEED = 12
+
+LED_GRID_HEIGHT = 18
+LED_GRID_WIDTH = 7
+
+DIS_HEIGHT = LED_GRID_HEIGHT * SNAKE_BLOCK_DIM
+DIS_WIDTH = LED_GRID_WIDTH * SNAKE_BLOCK_DIM
  
-dis_width = 70
-dis_height = 180
- 
-dis = pygame.display.set_mode((dis_width, dis_height))
+dis = pygame.display.set_mode((DIS_WIDTH, DIS_HEIGHT))
 pygame.display.set_caption('Snake Game by Edureka')
  
 clock = pygame.time.Clock()
- 
-snake_block = 10
-snake_speed = 4
  
 font_style = pygame.font.SysFont("bahnschrift", 25)
 score_font = pygame.font.SysFont("comicsansms", 35)
 
 OFFSET = 3
 
-def getLedPos(x, y):
-    # print('x', x, 'y', y)
+def get_led_pos(x, y):
     columnIsOdd = x % 2 != 0
 
     if columnIsOdd:
-        first = (led_height + OFFSET) * x - 1
+        first = (LED_GRID_HEIGHT + OFFSET) * x - 1
         position = first + y + 1
 
         return int(position)
     else:
-        first = (led_height + OFFSET) * x
-        position = first + (led_height - y) - 1# subtract 1 since grid starts at 0
+        first = (LED_GRID_HEIGHT + OFFSET) * x
+        position = first + (LED_GRID_HEIGHT - y) - 1# subtract 1 since grid starts at 0
 
         return int(position)
 
-def lightCoordinate(x, y):
-    pos = getLedPos(x, y)
-    print('pos', pos)
-    strip.setPixelColor(pos, Color(255, 255, 255))
+def clear_strip():
+    for index in range(LED_COUNT):
+        strip.setPixelColor(index, BLACK)
+
+def light_coordinate(x, y, color):
+    pos = get_led_pos(int(x), int(y))
+    strip.setPixelColor(pos, color)
  
 # need equivalent led version
-def our_snake(snake_block, snake_list):
+def draw_gui_snake(SNAKE_BLOCK_DIM, snake_list):
     for x in snake_list:
-        pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
+        pygame.draw.rect(dis, gui_black, [x[0], x[1], SNAKE_BLOCK_DIM, SNAKE_BLOCK_DIM])
 
 def draw_led_snake(led_snake_list):
     for x in led_snake_list:
-        pos = getLedPos(int(x[0]), int(x[1]))
-        # print('light pos', pos)
-        # clear strip
-        strip.setPixelColor(pos, Color(255, 255, 255))
- 
-# not used in led version
-def message(msg, color):
-    mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [dis_width / 6, dis_height / 3])
+        light_coordinate(x[0], x[1], WHITE)
 
-def colorWipe(strip, color, wait_ms=2):
+def color_wipe(strip, color, wait_ms=2):
     """Wipe color across display a pixel at a time."""
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()
         time.sleep(wait_ms/1000.0)
- 
-def gameLoop():
-    # clear strip
-    for index in range(LED_COUNT):
-        strip.setPixelColor(index, Color(0, 0, 0))
 
+def gen_random_coordinate():
+    x = random.randint(0, LED_GRID_WIDTH - 1)
+    y = random.randint(0, LED_GRID_HEIGHT - 1)
+    return (x, y)
+ 
+def game_loop():
+    # clear strip
+    clear_strip()
     strip.show()
 
     game_over = False
     game_close = False
  
-    gridX = int(led_width / 2)
-    gridY = int(led_height / 2)
-    x1 = dis_width / 2
-    y1 = dis_height / 2
+    led_x = int(LED_GRID_WIDTH / 2)
+    led_y = int(LED_GRID_HEIGHT / 2)
+    x1 = DIS_WIDTH / 2
+    y1 = DIS_HEIGHT / 2
  
     gridX_change = 0
     gridY_change = 0
@@ -113,23 +113,22 @@ def gameLoop():
     currentDirection = 'init'
     snake_List = []
     led_snake_list = []
-    Length_of_snake = 1
+    length_of_snake = 1
 
-    # foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-    # foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+    # foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+    # foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
 
-    gridfoodx = 3
-    gridfoody = 3
+    led_food_coordinate = gen_random_coordinate()
+    gridfoodx = led_food_coordinate[0]
+    gridfoody = led_food_coordinate[1]
  
     while not game_over:
         for index in range(LED_COUNT):
             strip.setPixelColor(index, Color(0, 0, 0))
  
         while game_close == True:
-            colorWipe(strip, Color(255, 0, 0))
-            dis.fill(blue)
-
-            message("You Lost! Press C-Play Again or Q-Quit", red)
+            color_wipe(strip, Color(255, 0, 0))
+            dis.fill(gui_blue)
  
             pygame.display.update()
 
@@ -139,7 +138,7 @@ def gameLoop():
                         game_over = True
                         game_close = False
                     if event.key == pygame.K_c:
-                        gameLoop()
+                        game_loop()
  
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -147,25 +146,25 @@ def gameLoop():
             if event.type == pygame.KEYDOWN:
                 print('keydown')
                 if event.key == pygame.K_LEFT and currentDirection != "right":
-                    x1_change = -snake_block
+                    x1_change = -SNAKE_BLOCK_DIM
                     y1_change = 0
                     gridX_change = -1
                     gridY_change = 0
                     currentDirection = "left"
                 elif event.key == pygame.K_RIGHT and currentDirection != "left":
-                    x1_change = snake_block
+                    x1_change = SNAKE_BLOCK_DIM
                     y1_change = 0
                     gridX_change = 1
                     gridY_change = 0
                     currentDirection = "right"
                 elif event.key == pygame.K_UP and currentDirection != "down":
-                    y1_change = -snake_block
+                    y1_change = -SNAKE_BLOCK_DIM
                     x1_change = 0
                     gridX_change = 0
                     gridY_change = 1
                     currentDirection = "up"
                 elif event.key == pygame.K_DOWN and currentDirection != "up":
-                    y1_change = snake_block
+                    y1_change = SNAKE_BLOCK_DIM
                     x1_change = 0
                     gridX_change = 0
                     gridY_change = -1
@@ -173,51 +172,51 @@ def gameLoop():
 
         x1 += x1_change
         y1 += y1_change
-        gridX += gridX_change
-        gridY += gridY_change
-        dis.fill(blue)
+        led_x += gridX_change
+        led_y += gridY_change
+        dis.fill(gui_blue)
 
-        if gridX > led_width - 1:
+        if led_x > LED_GRID_WIDTH - 1:
             print('mallow 1')
-            gridX = 0
-        elif gridX < 0:
+            led_x = 0
+        elif led_x < 0:
             print('mallow 2')
-            gridX = led_width - 1
-        elif gridY >= led_height:
+            led_x = LED_GRID_WIDTH - 1
+        elif led_y >= LED_GRID_HEIGHT:
             print('mallow 3')
             print('resetting')
-            gridY = 0
-        elif gridY < 0:
+            led_y = 0
+        elif led_y < 0:
             print('mallow 4')
-            gridY = led_height - 1
+            led_y = LED_GRID_HEIGHT - 1
         
-        if x1 >= dis_width:
+        if x1 >= DIS_WIDTH:
             x1 = 0
         if x1 < 0:
-            x1 = dis_width
-        if y1 >= dis_height:
+            x1 = DIS_WIDTH
+        if y1 >= DIS_HEIGHT:
             y1 = 0
         if y1 < 0:
-            y1 = dis_height
-        # print('first x', gridX, 'y', gridY)
+            y1 = DIS_HEIGHT
+        # print('first x', led_x, 'y', led_y)
        
 
-        # pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
+        # pygame.draw.rect(dis, gui_green, [foodx, foody, SNAKE_BLOCK_DIM, SNAKE_BLOCK_DIM])
         
         # print('light pos', pos)
         # clear strip
-        pos = getLedPos(int(gridfoodx), int(gridfoody))
+        pos = get_led_pos(int(gridfoodx), int(gridfoody))
         strip.setPixelColor(pos, Color(0, 255, 0))
         snake_Head = []
         led_snake_head = []
         snake_Head.append(x1)
         snake_Head.append(y1)
-        print('x', gridX, 'y', gridY)
-        led_snake_head.append(gridX)
-        led_snake_head.append(gridY)
+        print('x', led_x, 'y', led_y)
+        led_snake_head.append(led_x)
+        led_snake_head.append(led_y)
         snake_List.append(snake_Head)
         led_snake_list.append(led_snake_head)
-        if len(snake_List) > Length_of_snake:
+        if len(snake_List) > length_of_snake:
             del snake_List[0]
             del led_snake_list[0]
  
@@ -225,9 +224,9 @@ def gameLoop():
             if x == snake_Head:
                 game_close = True
  
-        our_snake(snake_block, snake_List)
+        draw_gui_snake(SNAKE_BLOCK_DIM, snake_List)
         #draw led_snake again
-        # pos = getLedPos(gridX, gridY)
+        # pos = get_led_pos(led_x, led_y)
         # # print('light pos', pos)
         # # clear strip
         # for index in range(LED_COUNT - 1):
@@ -241,20 +240,21 @@ def gameLoop():
  
         # print('foodx', foodx, 'foody', foody)
         # if x1 == foodx and y1 == foody:
-        #     foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-        #     foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
-        #     Length_of_snake += 1
-        if gridX == gridfoodx and gridY == gridfoody:
-            # foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            # foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
-            gridfoodx = random.randint(0, led_width - 1)
-            gridfoody = random.randint(0, led_height - 1)
-            Length_of_snake += 1
+        #     foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+        #     foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+        #     length_of_snake += 1
+        if led_x == gridfoodx and led_y == gridfoody:
+            # foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+            # foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+            led_food_coordinate = gen_random_coordinate()
+            gridfoodx = led_food_coordinate[0]
+            gridfoody = led_food_coordinate[1]
+            length_of_snake += 1
  
-        clock.tick(snake_speed)
+        clock.tick(SNAKE_SPEED)
  
     pygame.quit()
     quit()
  
  
-gameLoop()
+game_loop()
