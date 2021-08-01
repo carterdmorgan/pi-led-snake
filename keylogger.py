@@ -1,7 +1,8 @@
+import keyboard
 from rpi_ws281x import *
 
 # LED strip configuration:
-LED_COUNT      = 143      # Number of LED pixels.
+LED_COUNT      = 144      # Number of LED pixels.
 LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
 #LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
@@ -15,10 +16,26 @@ strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, 
 # Intialize the library (must be called once before other functions).
 strip.begin()
 
-# clear strip
-for index in range(LED_COUNT - 1):
-    strip.setPixelColor(index, Color(0, 0, 0))
+count = 0
+RED = Color(255, 0, 0)
+BLACK = Color(0, 0, 0)
 
-print(int(6/ 5))
-strip.setPixelColor(0, Color(255, 0, 0))
-strip.show()
+def callback(key):
+    print(key.name)
+
+    global count
+    count += 1
+    for pos in range(count):
+        strip.setPixelColor(pos, RED)
+
+    if count > LED_COUNT:
+        for pos in range(count):
+            strip.setPixelColor(pos, BLACK)
+        count = 0
+    
+    strip.show()
+    
+keyboard.on_release(callback=callback)
+
+while True:
+    print('test')
