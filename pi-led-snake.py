@@ -1,4 +1,4 @@
-import pygame
+# import pygame
 import time
 import random
 import keyboard
@@ -19,7 +19,7 @@ strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, 
 # Intialize the library (must be called once before other functions).
 strip.begin()
  
-pygame.init()
+# pygame.init()
 
 WHITE = Color(255, 255, 255)
 GREEN = Color(0, 255, 0)
@@ -51,9 +51,9 @@ OFFSET = 3
 DIS_HEIGHT = LED_GRID_HEIGHT * SNAKE_BLOCK_DIM
 DIS_WIDTH = LED_GRID_WIDTH * SNAKE_BLOCK_DIM
  
-dis = pygame.display.set_mode((DIS_WIDTH, DIS_HEIGHT))
+# dis = pygame.display.set_mode((DIS_WIDTH, DIS_HEIGHT))
  
-clock = pygame.time.Clock()
+# clock = pygame.time.Clock()
 
 
 LED_MID_X = int(LED_GRID_WIDTH / 2)
@@ -153,39 +153,45 @@ gridX_change = 0
 gridY_change = 0
 
 currentDirection = 'init'
+orientation_selected = False
+
+in_menu = True
+game_close = False
+new_game = False
 
 def main_menu():
     print('selecting orientaion')
     clear_strip()
-    orientation_selected = False
+    
     orientation_arrow_coordinates = ZERO_ARROW_COORDINATES
 
-    global ORIENTATION
+    # global ORIENTATION
 
-    nav_keys = {
-        pygame.K_LEFT, 
-        pygame.K_RIGHT, 
-        pygame.K_UP, 
-        pygame.K_DOWN,
-        pygame.K_KP1,
-        pygame.K_KP3,
-        pygame.K_KP5,
-        pygame.K_KP2,
-    }
+    # nav_keys = {
+    #     pygame.K_LEFT, 
+    #     pygame.K_RIGHT, 
+    #     pygame.K_UP, 
+    #     pygame.K_DOWN,
+    #     pygame.K_KP1,
+    #     pygame.K_KP3,
+    #     pygame.K_KP5,
+    #     pygame.K_KP2,
+    # }
 
     while not orientation_selected:
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key in nav_keys:
-                    ORIENTATION += 90
-                    if ORIENTATION > 270:
-                        ORIENTATION = 0
-                    orientation_arrow_coordinates = ARROW_COORDINATES_DICT[ORIENTATION]
-                elif event.key == pygame.K_c or event.key == pygame.K_KP9:
-                    orientation_selected = True
-                elif event.key in {pygame.K_q, pygame.K_KP7}:
-                    print('will quit here')
+        # for event in pygame.event.get():
+        #     if event.type == pygame.KEYDOWN:
+        #         if event.key in nav_keys:
+        #             ORIENTATION += 90
+        #             if ORIENTATION > 270:
+        #                 ORIENTATION = 0
+        #             orientation_arrow_coordinates = ARROW_COORDINATES_DICT[ORIENTATION]
+        #         elif event.key == pygame.K_c or event.key == pygame.K_KP9:
+        #             orientation_selected = True
+        #         elif event.key in {pygame.K_q, pygame.K_KP7}:
+        #             print('will quit here')
 
+        orientation_arrow_coordinates = ARROW_COORDINATES_DICT[ORIENTATION]
         clear_strip()
 
         for coordinate in orientation_arrow_coordinates:
@@ -221,6 +227,8 @@ def main_menu():
         DOWN_CHANGE = TWO_SEVENTY_DOWN_CHANGE
         LEFT_CHANGE = TWO_SEVENTY_LEFT_CHANGE
 
+    global in_menu
+    in_menu = False
     game_loop()
 
 def get_led_pos(x, y):
@@ -278,10 +286,11 @@ def gen_random_coordinate():
     return (x, y)
  
 def game_loop():
+    print('in game loop')
     strip.show()
 
+    global game_close
     game_over = False
-    game_close = False
  
     led_x = int(LED_GRID_WIDTH / 2)
     led_y = int(LED_GRID_HEIGHT / 2)
@@ -304,139 +313,193 @@ def game_loop():
     
     food_added = False
  
-    while not game_over:
-        while game_close == True:
-            # color_wipe(strip, RED, 5)
-            color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
+    while game_close == True:
+        # color_wipe(strip, RED, 5)
+        color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
 
-            global SNAKE_COLOR
-            SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
+        global SNAKE_COLOR
+        SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
 
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        clear_strip()
-                        game_over = True
-                        game_close = False
-                    if event.key == pygame.K_c or event.key == pygame.K_KP9:
-                        game_loop()
- 
-        clear_strip()
+        # for event in pygame.event.get():
+        #     if event.type == pygame.KEYDOWN:
+        #         if event.key == pygame.K_q:
+        #             clear_strip()
+        #             game_over = True
+        #             game_close = False
+        #         if event.key == pygame.K_c or event.key == pygame.K_KP9:
+        #             game_loop()
+    global new_game
+    if new_game:
+        led_x = int(LED_GRID_WIDTH / 2)
+        led_y = int(LED_GRID_HEIGHT / 2)
+    
+        led_snake_list = []
+        length_of_snake = 1
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_over = True
-            # if event.type == pygame.KEYDOWN:
-            #     if (event.key == pygame.K_LEFT or event.key == pygame.K_KP1) and currentDirection != "right":
-            #         gridX_change = LEFT_CHANGE[0]
-            #         gridY_change = LEFT_CHANGE[1]
-            #         currentDirection = "left"
-            #     elif (event.key == pygame.K_RIGHT or event.key == pygame.K_KP3) and currentDirection != "left":
-            #         gridX_change = RIGHT_CHANGE[0]
-            #         gridY_change = RIGHT_CHANGE[1]
-            #         currentDirection = "right"
-            #     elif (event.key == pygame.K_UP or event.key == pygame.K_KP5)and currentDirection != "down":
-            #         gridX_change = UP_CHANGE[0]
-            #         gridY_change = UP_CHANGE[1]
-            #         currentDirection = "up"
-            #     elif (event.key == pygame.K_DOWN or event.key == pygame.K_KP2) and currentDirection != "up":
-            #         gridX_change = DOWN_CHANGE[0]
-            #         gridY_change = DOWN_CHANGE[1]
-            #         currentDirection = "down"
-            #     elif event.key == pygame.K_c or event.key == pygame.K_KP9:
-            #         main_menu()
+        food_added = False
 
-        print(gridX_change, gridY_change)
-        led_x += gridX_change
-        led_y += gridY_change
+        while not food_added:
+            led_food_coordinate = gen_random_coordinate()
+            led_food_x = led_food_coordinate[0]
+            led_food_y = led_food_coordinate[1]
 
-        if led_x > LED_GRID_WIDTH - 1:
-            led_x = 0
-        elif led_x < 0:
-            led_x = LED_GRID_WIDTH - 1
-        elif led_y >= LED_GRID_HEIGHT:
-            led_y = 0
-        elif led_y < 0:
-            led_y = LED_GRID_HEIGHT - 1
+            food_added = True
 
-        food_pos = get_led_pos(int(led_food_x), int(led_food_y))
-        strip.setPixelColor(food_pos, FOOD_COLOR)
-        led_snake_head = []
-
-        led_snake_head.append(led_x)
-        led_snake_head.append(led_y)
-
-        led_snake_list.append(led_snake_head)
-        if len(led_snake_list) > length_of_snake:
-            del led_snake_list[0]
- 
-        for x in led_snake_list[:-1]:
-            if x == led_snake_head:
-                game_close = True
- 
-        draw_led_snake(led_snake_list)
+            for snake_part in led_snake_list:
+                if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
+                    food_added = False
         
-        strip.show() # update strip lights
-        pygame.display.update()
+        new_game = False
 
-        if led_x == led_food_x and led_y == led_food_y:
-            # foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
-            # foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
-            while not food_added:
-                led_food_coordinate = gen_random_coordinate()
-                led_food_x = led_food_coordinate[0]
-                led_food_y = led_food_coordinate[1]
 
-                food_added = True
+    clear_strip()
 
-                for snake_part in led_snake_list:
-                    if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
-                        food_added = False
+    # for event in pygame.event.get():
+    #     if event.type == pygame.QUIT:
+    #         game_over = True
+        # if event.type == pygame.KEYDOWN:
+        #     if (event.key == pygame.K_LEFT or event.key == pygame.K_KP1) and currentDirection != "right":
+        #         gridX_change = LEFT_CHANGE[0]
+        #         gridY_change = LEFT_CHANGE[1]
+        #         currentDirection = "left"
+        #     elif (event.key == pygame.K_RIGHT or event.key == pygame.K_KP3) and currentDirection != "left":
+        #         gridX_change = RIGHT_CHANGE[0]
+        #         gridY_change = RIGHT_CHANGE[1]
+        #         currentDirection = "right"
+        #     elif (event.key == pygame.K_UP or event.key == pygame.K_KP5)and currentDirection != "down":
+        #         gridX_change = UP_CHANGE[0]
+        #         gridY_change = UP_CHANGE[1]
+        #         currentDirection = "up"
+        #     elif (event.key == pygame.K_DOWN or event.key == pygame.K_KP2) and currentDirection != "up":
+        #         gridX_change = DOWN_CHANGE[0]
+        #         gridY_change = DOWN_CHANGE[1]
+        #         currentDirection = "down"
+        #     elif event.key == pygame.K_c or event.key == pygame.K_KP9:
+        #         main_menu()
+    led_x += gridX_change
+    led_y += gridY_change
 
-            food_added = False
+    if led_x > LED_GRID_WIDTH - 1:
+        led_x = 0
+    elif led_x < 0:
+        led_x = LED_GRID_WIDTH - 1
+    elif led_y >= LED_GRID_HEIGHT:
+        led_y = 0
+    elif led_y < 0:
+        led_y = LED_GRID_HEIGHT - 1
 
-            length_of_snake += 1
-            index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
-            if length_of_snake <= 8:
-                index = 0
-            elif length_of_snake <= 16:
-                index = 1
-            elif length_of_snake <= 24:
-                index = 2
-            elif length_of_snake > 24:
-                index = 3
+    food_pos = get_led_pos(int(led_food_x), int(led_food_y))
+    strip.setPixelColor(food_pos, FOOD_COLOR)
+    led_snake_head = []
 
-            SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
- 
-        clock.tick(SNAKE_SPEED)
- 
-    pygame.quit()
-    quit()
+    led_snake_head.append(led_x)
+    led_snake_head.append(led_y)
+
+    led_snake_list.append(led_snake_head)
+    if len(led_snake_list) > length_of_snake:
+        del led_snake_list[0]
+
+    for x in led_snake_list[:-1]:
+        print ('x', x)
+        if x == led_snake_head:
+            print('setting game close to true')
+            game_close = True
+
+    draw_led_snake(led_snake_list)
+    
+    strip.show() # update strip lights
+    # pygame.display.update()
+
+    if led_x == led_food_x and led_y == led_food_y:
+        # foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+        # foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+        while not food_added:
+            led_food_coordinate = gen_random_coordinate()
+            led_food_x = led_food_coordinate[0]
+            led_food_y = led_food_coordinate[1]
+
+            food_added = True
+
+            for snake_part in led_snake_list:
+                if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
+                    food_added = False
+
+        food_added = False
+
+        length_of_snake += 1
+        index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
+        if length_of_snake <= 8:
+            index = 0
+        elif length_of_snake <= 16:
+            index = 1
+        elif length_of_snake <= 24:
+            index = 2
+        elif length_of_snake > 24:
+            index = 3
+
+        SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
+
+    time.sleep(1/SNAKE_SPEED)
 
 def callback(key):
     print(key.name)
     global gridX_change
     global gridY_change
     global currentDirection
-    
-    if key.name in {'1', 'left'} and currentDirection != "right":
-        gridX_change = LEFT_CHANGE[0]
-        gridY_change = LEFT_CHANGE[1]
-        currentDirection = "left"
-    elif key.name in {'3', 'right'} and currentDirection != "left":
-        gridX_change = RIGHT_CHANGE[0]
-        gridY_change = RIGHT_CHANGE[1]
-        currentDirection = "right"
-    elif key.name in {'5', 'up'} and currentDirection != "down":
-        gridX_change = UP_CHANGE[0]
-        gridY_change = UP_CHANGE[1]
-        currentDirection = "up"
-    elif key.name in {'2', 'down'} and currentDirection != "up":
-        gridX_change = DOWN_CHANGE[0]
-        gridY_change = DOWN_CHANGE[1]
-        currentDirection = "down"
-    # elif key.name in {'9', 'c'}:
-    #     main_menu()
+    global game_close
+    global new_game
+
+    nav_keys = [
+        'left',
+        'right',
+        'up',
+        'down',
+        '1',
+        '2',
+        '3',
+        '5'
+    ]
+
+    if in_menu:
+        print('here 1')
+        if key.name in nav_keys:
+            global ORIENTATION
+            ORIENTATION += 90
+            if ORIENTATION > 270:
+                ORIENTATION = 0
+        elif key.name in {'9', 'c'}:
+            global orientation_selected
+            orientation_selected = True
+    else:
+        print('here 2')
+        if not game_close:
+            if key.name in {'1', 'left'} and currentDirection != "right":
+                gridX_change = LEFT_CHANGE[0]
+                gridY_change = LEFT_CHANGE[1]
+                currentDirection = "left"
+            elif key.name in {'3', 'right'} and currentDirection != "left":
+                gridX_change = RIGHT_CHANGE[0]
+                gridY_change = RIGHT_CHANGE[1]
+                currentDirection = "right"
+            elif key.name in {'5', 'up'} and currentDirection != "down":
+                gridX_change = UP_CHANGE[0]
+                gridY_change = UP_CHANGE[1]
+                currentDirection = "up"
+            elif key.name in {'2', 'down'} and currentDirection != "up":
+                gridX_change = DOWN_CHANGE[0]
+                gridY_change = DOWN_CHANGE[1]
+                currentDirection = "down"
+            elif key.name in {'9', 'c'}:
+                main_menu()
+        else:
+            print('here 3')
+            if (key.name) in {'9', 'c'}:
+                print('starting game loop')
+                gridX_change = 0
+                gridY_change = 0
+                game_close = False
+                currentDirection = 'init'
+                new_game = True
     
 keyboard.on_press(callback=callback)
 
