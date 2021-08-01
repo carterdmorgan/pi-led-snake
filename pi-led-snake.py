@@ -313,133 +313,134 @@ def game_loop():
     
     food_added = False
  
-    while game_close == True:
-        # color_wipe(strip, RED, 5)
-        color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
+    while not game_over:
+        while game_close == True:
+            # color_wipe(strip, RED, 5)
+            color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
 
-        global SNAKE_COLOR
-        SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
+            global SNAKE_COLOR
+            SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
+
+            # for event in pygame.event.get():
+            #     if event.type == pygame.KEYDOWN:
+            #         if event.key == pygame.K_q:
+            #             clear_strip()
+            #             game_over = True
+            #             game_close = False
+            #         if event.key == pygame.K_c or event.key == pygame.K_KP9:
+            #             game_loop()
+        global new_game
+        if new_game:
+            led_x = int(LED_GRID_WIDTH / 2)
+            led_y = int(LED_GRID_HEIGHT / 2)
+        
+            led_snake_list = []
+            length_of_snake = 1
+
+            food_added = False
+
+            while not food_added:
+                led_food_coordinate = gen_random_coordinate()
+                led_food_x = led_food_coordinate[0]
+                led_food_y = led_food_coordinate[1]
+
+                food_added = True
+
+                for snake_part in led_snake_list:
+                    if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
+                        food_added = False
+            
+            new_game = False
+
+ 
+        clear_strip()
 
         # for event in pygame.event.get():
-        #     if event.type == pygame.KEYDOWN:
-        #         if event.key == pygame.K_q:
-        #             clear_strip()
-        #             game_over = True
-        #             game_close = False
-        #         if event.key == pygame.K_c or event.key == pygame.K_KP9:
-        #             game_loop()
-    global new_game
-    if new_game:
-        led_x = int(LED_GRID_WIDTH / 2)
-        led_y = int(LED_GRID_HEIGHT / 2)
-    
-        led_snake_list = []
-        length_of_snake = 1
+        #     if event.type == pygame.QUIT:
+        #         game_over = True
+            # if event.type == pygame.KEYDOWN:
+            #     if (event.key == pygame.K_LEFT or event.key == pygame.K_KP1) and currentDirection != "right":
+            #         gridX_change = LEFT_CHANGE[0]
+            #         gridY_change = LEFT_CHANGE[1]
+            #         currentDirection = "left"
+            #     elif (event.key == pygame.K_RIGHT or event.key == pygame.K_KP3) and currentDirection != "left":
+            #         gridX_change = RIGHT_CHANGE[0]
+            #         gridY_change = RIGHT_CHANGE[1]
+            #         currentDirection = "right"
+            #     elif (event.key == pygame.K_UP or event.key == pygame.K_KP5)and currentDirection != "down":
+            #         gridX_change = UP_CHANGE[0]
+            #         gridY_change = UP_CHANGE[1]
+            #         currentDirection = "up"
+            #     elif (event.key == pygame.K_DOWN or event.key == pygame.K_KP2) and currentDirection != "up":
+            #         gridX_change = DOWN_CHANGE[0]
+            #         gridY_change = DOWN_CHANGE[1]
+            #         currentDirection = "down"
+            #     elif event.key == pygame.K_c or event.key == pygame.K_KP9:
+            #         main_menu()
+        led_x += gridX_change
+        led_y += gridY_change
 
-        food_added = False
+        if led_x > LED_GRID_WIDTH - 1:
+            led_x = 0
+        elif led_x < 0:
+            led_x = LED_GRID_WIDTH - 1
+        elif led_y >= LED_GRID_HEIGHT:
+            led_y = 0
+        elif led_y < 0:
+            led_y = LED_GRID_HEIGHT - 1
 
-        while not food_added:
-            led_food_coordinate = gen_random_coordinate()
-            led_food_x = led_food_coordinate[0]
-            led_food_y = led_food_coordinate[1]
+        food_pos = get_led_pos(int(led_food_x), int(led_food_y))
+        strip.setPixelColor(food_pos, FOOD_COLOR)
+        led_snake_head = []
 
-            food_added = True
+        led_snake_head.append(led_x)
+        led_snake_head.append(led_y)
 
-            for snake_part in led_snake_list:
-                if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
-                    food_added = False
+        led_snake_list.append(led_snake_head)
+        if len(led_snake_list) > length_of_snake:
+            del led_snake_list[0]
+ 
+        for x in led_snake_list[:-1]:
+            print ('x', x)
+            if x == led_snake_head:
+                print('setting game close to true')
+                game_close = True
+ 
+        draw_led_snake(led_snake_list)
         
-        new_game = False
+        strip.show() # update strip lights
+        # pygame.display.update()
 
+        if led_x == led_food_x and led_y == led_food_y:
+            # foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+            # foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
+            while not food_added:
+                led_food_coordinate = gen_random_coordinate()
+                led_food_x = led_food_coordinate[0]
+                led_food_y = led_food_coordinate[1]
 
-    clear_strip()
+                food_added = True
 
-    # for event in pygame.event.get():
-    #     if event.type == pygame.QUIT:
-    #         game_over = True
-        # if event.type == pygame.KEYDOWN:
-        #     if (event.key == pygame.K_LEFT or event.key == pygame.K_KP1) and currentDirection != "right":
-        #         gridX_change = LEFT_CHANGE[0]
-        #         gridY_change = LEFT_CHANGE[1]
-        #         currentDirection = "left"
-        #     elif (event.key == pygame.K_RIGHT or event.key == pygame.K_KP3) and currentDirection != "left":
-        #         gridX_change = RIGHT_CHANGE[0]
-        #         gridY_change = RIGHT_CHANGE[1]
-        #         currentDirection = "right"
-        #     elif (event.key == pygame.K_UP or event.key == pygame.K_KP5)and currentDirection != "down":
-        #         gridX_change = UP_CHANGE[0]
-        #         gridY_change = UP_CHANGE[1]
-        #         currentDirection = "up"
-        #     elif (event.key == pygame.K_DOWN or event.key == pygame.K_KP2) and currentDirection != "up":
-        #         gridX_change = DOWN_CHANGE[0]
-        #         gridY_change = DOWN_CHANGE[1]
-        #         currentDirection = "down"
-        #     elif event.key == pygame.K_c or event.key == pygame.K_KP9:
-        #         main_menu()
-    led_x += gridX_change
-    led_y += gridY_change
+                for snake_part in led_snake_list:
+                    if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
+                        food_added = False
 
-    if led_x > LED_GRID_WIDTH - 1:
-        led_x = 0
-    elif led_x < 0:
-        led_x = LED_GRID_WIDTH - 1
-    elif led_y >= LED_GRID_HEIGHT:
-        led_y = 0
-    elif led_y < 0:
-        led_y = LED_GRID_HEIGHT - 1
+            food_added = False
 
-    food_pos = get_led_pos(int(led_food_x), int(led_food_y))
-    strip.setPixelColor(food_pos, FOOD_COLOR)
-    led_snake_head = []
+            length_of_snake += 1
+            index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
+            if length_of_snake <= 8:
+                index = 0
+            elif length_of_snake <= 16:
+                index = 1
+            elif length_of_snake <= 24:
+                index = 2
+            elif length_of_snake > 24:
+                index = 3
 
-    led_snake_head.append(led_x)
-    led_snake_head.append(led_y)
+            SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
 
-    led_snake_list.append(led_snake_head)
-    if len(led_snake_list) > length_of_snake:
-        del led_snake_list[0]
-
-    for x in led_snake_list[:-1]:
-        print ('x', x)
-        if x == led_snake_head:
-            print('setting game close to true')
-            game_close = True
-
-    draw_led_snake(led_snake_list)
-    
-    strip.show() # update strip lights
-    # pygame.display.update()
-
-    if led_x == led_food_x and led_y == led_food_y:
-        # foodx = round(random.randrange(0, DIS_WIDTH - SNAKE_BLOCK_DIM) / 10.0) * 10.0
-        # foody = round(random.randrange(0, DIS_HEIGHT - SNAKE_BLOCK_DIM) / 10.0) * 10.0
-        while not food_added:
-            led_food_coordinate = gen_random_coordinate()
-            led_food_x = led_food_coordinate[0]
-            led_food_y = led_food_coordinate[1]
-
-            food_added = True
-
-            for snake_part in led_snake_list:
-                if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
-                    food_added = False
-
-        food_added = False
-
-        length_of_snake += 1
-        index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
-        if length_of_snake <= 8:
-            index = 0
-        elif length_of_snake <= 16:
-            index = 1
-        elif length_of_snake <= 24:
-            index = 2
-        elif length_of_snake > 24:
-            index = 3
-
-        SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
-
-    time.sleep(1/SNAKE_SPEED)
+        time.sleep(1/SNAKE_SPEED)
 
 def callback(key):
     print(key.name)
