@@ -208,8 +208,10 @@ def main_menu():
         LEFT_CHANGE = TWO_SEVENTY_LEFT_CHANGE
 
     global in_menu
+    global game_close
     in_menu = False
     game_over = False
+    game_close = False
 
 def get_led_pos(x, y):
     columnIsOdd = x % 2 != 0
@@ -266,44 +268,18 @@ def gen_random_coordinate():
     return (x, y)
  
 def game_loop():
-    print('in game loop')
-    strip.show()
 
-    global game_close
-    global game_over
- 
-    led_x = int(LED_GRID_WIDTH / 2)
-    led_y = int(LED_GRID_HEIGHT / 2)
- 
-    led_snake_list = []
-    length_of_snake = 1
+    while True:
+        print('looping')
+        if in_menu:
+            main_menu()
+        else: 
+            print('in game loop')
+            strip.show()
 
-    food_added = False
-
-    while not food_added:
-        led_food_coordinate = gen_random_coordinate()
-        led_food_x = led_food_coordinate[0]
-        led_food_y = led_food_coordinate[1]
-
-        food_added = True
-
-        for snake_part in led_snake_list:
-            if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
-                food_added = False
-    
-    food_added = False
- 
-    while not game_over:
-        while game_close == True:
-            # color_wipe(strip, RED, 5)
-            color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
-
-            global SNAKE_COLOR
-            SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
-            print('game close loop')
-
-        global new_game
-        if new_game:
+            global game_close
+            global game_over
+        
             led_x = int(LED_GRID_WIDTH / 2)
             led_y = int(LED_GRID_HEIGHT / 2)
         
@@ -323,72 +299,103 @@ def game_loop():
                     if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
                         food_added = False
             
-            new_game = False
-
- 
-        clear_strip()
-
-        led_x += gridX_change
-        led_y += gridY_change
-
-        if led_x > LED_GRID_WIDTH - 1:
-            led_x = 0
-        elif led_x < 0:
-            led_x = LED_GRID_WIDTH - 1
-        elif led_y >= LED_GRID_HEIGHT:
-            led_y = 0
-        elif led_y < 0:
-            led_y = LED_GRID_HEIGHT - 1
-
-        food_pos = get_led_pos(int(led_food_x), int(led_food_y))
-        strip.setPixelColor(food_pos, FOOD_COLOR)
-        led_snake_head = []
-
-        led_snake_head.append(led_x)
-        led_snake_head.append(led_y)
-
-        led_snake_list.append(led_snake_head)
-        if len(led_snake_list) > length_of_snake:
-            del led_snake_list[0]
- 
-        for x in led_snake_list[:-1]:
-            print ('x', x)
-            if x == led_snake_head:
-                print('setting game close to true')
-                game_close = True
- 
-        draw_led_snake(led_snake_list)
-        
-        strip.show() # update strip lights
-
-        if led_x == led_food_x and led_y == led_food_y:
-            while not food_added:
-                led_food_coordinate = gen_random_coordinate()
-                led_food_x = led_food_coordinate[0]
-                led_food_y = led_food_coordinate[1]
-
-                food_added = True
-
-                for snake_part in led_snake_list:
-                    if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
-                        food_added = False
-
             food_added = False
+        
+            while not game_over:
+                while game_close == True:
+                    # color_wipe(strip, RED, 5)
+                    color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
 
-            length_of_snake += 1
-            index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
-            if length_of_snake <= 8:
-                index = 0
-            elif length_of_snake <= 16:
-                index = 1
-            elif length_of_snake <= 24:
-                index = 2
-            elif length_of_snake > 24:
-                index = 3
+                    global SNAKE_COLOR
+                    SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
+                    print('game close loop')
 
-            SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
+                global new_game
+                if new_game:
+                    led_x = int(LED_GRID_WIDTH / 2)
+                    led_y = int(LED_GRID_HEIGHT / 2)
+                
+                    led_snake_list = []
+                    length_of_snake = 1
 
-        time.sleep(1/SNAKE_SPEED)
+                    food_added = False
+
+                    while not food_added:
+                        led_food_coordinate = gen_random_coordinate()
+                        led_food_x = led_food_coordinate[0]
+                        led_food_y = led_food_coordinate[1]
+
+                        food_added = True
+
+                        for snake_part in led_snake_list:
+                            if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
+                                food_added = False
+                    
+                    new_game = False
+
+        
+                clear_strip()
+
+                led_x += gridX_change
+                led_y += gridY_change
+
+                if led_x > LED_GRID_WIDTH - 1:
+                    led_x = 0
+                elif led_x < 0:
+                    led_x = LED_GRID_WIDTH - 1
+                elif led_y >= LED_GRID_HEIGHT:
+                    led_y = 0
+                elif led_y < 0:
+                    led_y = LED_GRID_HEIGHT - 1
+
+                food_pos = get_led_pos(int(led_food_x), int(led_food_y))
+                strip.setPixelColor(food_pos, FOOD_COLOR)
+                led_snake_head = []
+
+                led_snake_head.append(led_x)
+                led_snake_head.append(led_y)
+
+                led_snake_list.append(led_snake_head)
+                if len(led_snake_list) > length_of_snake:
+                    del led_snake_list[0]
+        
+                for x in led_snake_list[:-1]:
+                    if x == led_snake_head:
+                        print('setting game close to true')
+                        game_close = True
+        
+                draw_led_snake(led_snake_list)
+                
+                strip.show() # update strip lights
+
+                if led_x == led_food_x and led_y == led_food_y:
+                    while not food_added:
+                        led_food_coordinate = gen_random_coordinate()
+                        led_food_x = led_food_coordinate[0]
+                        led_food_y = led_food_coordinate[1]
+
+                        food_added = True
+
+                        for snake_part in led_snake_list:
+                            if snake_part[0] == led_food_x and snake_part[1] == led_food_y:
+                                food_added = False
+
+                    food_added = False
+
+                    length_of_snake += 1
+                    index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
+                    if length_of_snake <= 8:
+                        index = 0
+                    elif length_of_snake <= 16:
+                        index = 1
+                    elif length_of_snake <= 24:
+                        index = 2
+                    elif length_of_snake > 24:
+                        index = 3
+
+                    SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
+
+                time.sleep(1/SNAKE_SPEED)
 
 def callback(key):
     print(key.name)
@@ -398,6 +405,7 @@ def callback(key):
     global game_close
     global new_game
     global game_over
+    global in_menu
 
     nav_keys = [
         'left',
@@ -439,6 +447,14 @@ def callback(key):
                 gridX_change = DOWN_CHANGE[0]
                 gridY_change = DOWN_CHANGE[1]
                 currentDirection = "down"
+            if (key.name) in {'9', 'c'}:
+                in_menu = True
+                print('starting game loop')
+                gridX_change = 0
+                gridY_change = 0
+                game_over = True
+                currentDirection = 'init'
+                new_game = True
         else:
             print('here 3')
             if (key.name) in {'9', 'c'}:
@@ -452,5 +468,4 @@ def callback(key):
     
 keyboard.on_press(callback=callback)
 
-main_menu()
 game_loop()
