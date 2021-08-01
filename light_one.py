@@ -19,5 +19,5 @@ strip.begin()
 for index in range(LED_COUNT - 1):
     strip.setPixelColor(index, Color(0, 0, 0))
 
-strip.setPixelColor(94, Color(255, 0, 0))
+strip.setPixelColor(0, Color(255, 0, 0))
 strip.show()
