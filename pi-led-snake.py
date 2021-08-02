@@ -10,7 +10,7 @@ LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
 #LED_PIN        = 10      # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA        = 10      # DMA channel to use for generating signal (try 10)
-LED_BRIGHTNESS = 255     # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS = 128     # Set to 0 for darkest and 255 for brightest
 LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
@@ -161,7 +161,6 @@ new_game = False
 game_over = True
 
 def main_menu():
-    print('selecting orientaion')
     clear_strip()
     
     global orientation_selected
@@ -185,7 +184,6 @@ def main_menu():
     global DOWN_CHANGE
     global LEFT_CHANGE
     
-    print('confirming orientation', ORIENTATION)
     if ORIENTATION == 0:
         UP_CHANGE = ZERO_UP_CHANGE
         RIGHT_CHANGE = ZERO_RIGHT_CHANGE
@@ -270,11 +268,9 @@ def gen_random_coordinate():
 def game_loop():
 
     while True:
-        print('looping')
         if in_menu:
             main_menu()
         else: 
-            print('in game loop')
             strip.show()
 
             global game_close
@@ -303,12 +299,10 @@ def game_loop():
         
             while not game_over:
                 while game_close == True:
-                    # color_wipe(strip, RED, 5)
                     color_strips(strip, RED, GAME_OVER_ANIM_DELAY)
 
                     global SNAKE_COLOR
                     SNAKE_COLOR = SNAKE_COLOR_OPTIONS[0]
-                    print('game close loop')
 
                 global new_game
                 if new_game:
@@ -359,9 +353,8 @@ def game_loop():
                 if len(led_snake_list) > length_of_snake:
                     del led_snake_list[0]
         
-                for x in led_snake_list[:-1]:
-                    if x == led_snake_head:
-                        print('setting game close to true')
+                for index, snake_block in enumerate(led_snake_list[:-1]):
+                    if snake_block == led_snake_head:
                         game_close = True
         
                 draw_led_snake(led_snake_list)
@@ -384,21 +377,12 @@ def game_loop():
 
                     length_of_snake += 1
                     index = int(length_of_snake / ((LED_GRID_HEIGHT * LED_GRID_WIDTH) / 10))
-                    if length_of_snake <= 8:
-                        index = 0
-                    elif length_of_snake <= 16:
-                        index = 1
-                    elif length_of_snake <= 24:
-                        index = 2
-                    elif length_of_snake > 24:
-                        index = 3
 
                     SNAKE_COLOR = SNAKE_COLOR_OPTIONS[index]
 
                 time.sleep(1/SNAKE_SPEED)
 
 def callback(key):
-    print(key.name)
     global gridX_change
     global gridY_change
     global currentDirection
@@ -419,7 +403,6 @@ def callback(key):
     ]
 
     if in_menu:
-        print('here 1')
         if key.name in nav_keys:
             global ORIENTATION
             ORIENTATION += 90
@@ -429,7 +412,6 @@ def callback(key):
             global orientation_selected
             orientation_selected = True
     else:
-        print('here 2')
         if not game_close:
             if key.name in {'1', 'left'} and currentDirection != "right":
                 gridX_change = LEFT_CHANGE[0]
@@ -449,16 +431,13 @@ def callback(key):
                 currentDirection = "down"
             if (key.name) in {'9', 'c'}:
                 in_menu = True
-                print('starting game loop')
                 gridX_change = 0
                 gridY_change = 0
                 game_over = True
                 currentDirection = 'init'
                 new_game = True
         else:
-            print('here 3')
             if (key.name) in {'9', 'c'}:
-                print('starting game loop')
                 gridX_change = 0
                 gridY_change = 0
                 game_close = False
